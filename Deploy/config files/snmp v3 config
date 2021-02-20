@@ -1,0 +1,11 @@
+snmp-agent
+ snmp-agent sys-info version v3
+ snmp-agent group v3 v3group privacy read-view v3view write-view v3view notify-view v3view
+ snmp-agent target-host trap address udp-domain grafana_ip udp-port 161 params securityname xxxx v3 privacy
+ snmp-agent mib-view included v3view iso
+ snmp-agent usm-user v3 u_name
+ snmp-agent usm-user v3 u_name group v3group
+ snmp-agent usm-user v3 u_name authentication-mode sha cipher xxx
+ snmp-agent usm-user v3 u_name privacy-mode aes128 cipher xxx
+ snmp-agent trap source g0/0/xxxx
+ snmp-agent trap enable

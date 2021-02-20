@@ -1,0 +1,84 @@
+## Install Alertmanager
+[root@localhost home]# wget https://github.com/prometheus/alertmanager/releases/download/v0.21.0/alertmanager-0.21.0.linux-amd64.tar.gz
+[root@localhost home]# tar xvf alertmanager-0.21.0.linux-amd64.tar.gz
+[root@localhost home]# mv alertmanager-0.21.0.linux-amd64 /usr/local/alertmanager
+[root@localhost local]# vim /etc/systemd/system/alertmanager.service
+[Unit]
+Description=Alertmanager
+After=network-online.target
+
+[Service]
+Restart=on-failure
+ExecStart=/usr/local/alertmanager/alertmanager --config.file=/usr/local/alertmanager/alertmanager.yml
+
+[Install]
+WantedBy=multi-user.target
+
+[root@localhost local]# systemctl start alertmanager
+[root@localhost local]# systemctl enable alertmanager
+
+##  Alertmanager config
+[root@localhost alertmanager]# vim /usr/local/alertmanager/alertmanager.yml
+global:
+  resolve_timeout: 2m
+  http_config: {}
+  smtp_hello: localhost
+  smtp_require_tls: true
+  pagerduty_url: https://events.pagerduty.com/v2/enqueue
+  hipchat_api_url: https://api.hipchat.com/
+  opsgenie_api_url: https://api.opsgenie.com/
+  wechat_api_url: https://qyapi.weixin.qq.com/cgi-bin/
+  victorops_api_url: https://alert.victorops.com/integrations/generic/20131114/alert/
+  wechat_api_secret: '企业微信管理员提供'
+  wechat_api_corp_id: '企业微信管理员提供'
+  templates:
+  - '/usr/local/alertmanager/template/wechat.tmpl'
+route:
+  receiver: wechat
+  group_by:
+  - alertname_wechat
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 1h
+receivers:
+- name: 'wechat'
+  wechat_configs:
+  - corp_id: '企业微信管理员提供'
+     #to_party: '62'
+    to_user: '用户ID'      #多人用“|”隔开
+    agent_id: '企业微信管理员提供'
+    api_secret: '企业微信管理员提供'
+    send_resolved: true
+    http_config: {}
+    message: '{{ template "wechat.default.message" . }}'
+    api_url: https://qyapi.weixin.qq.com/cgi-bin/
+inhibit_rules:
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+equal: ['alertname', 'dev', 'instance']
+
+
+## message template
+[root@localhost alertmanager]# mkdir /usr/local/alertmanager/template
+[root@localhost alertmanager]# vim /usr/local/alertmanager/template/wechat.tmpl
+
+## 带恢复告警的模版 注：alertmanager.yml wechat_configs中加上配置send_resolved: true
+{{ define "wechat.default.message" }}
+{{ range $i, $alert :=.Alerts }}
+===Grafana监控报警===
+告警状态：{{   .Status }}
+告警级别：{{ $alert.Labels.severity }}
+告警类型：{{ $alert.Labels.alertname }}
+告警应用：{{ $alert.Annotations.summary }}
+故障主机: {{ $alert.Labels.instance }}
+告警主题: {{ $alert.Annotations.summary }}
+触发阀值：{{ $alert.Annotations.value }}
+告警详情: {{ $alert.Annotations.description }}
+触发时间: {{ (.StartsAt.Add 28800e9).Format  "2006-01-02 15:04:05" }}
+===========end============
+{{ end }}
+{{ end }}
+
+[root@localhost alertmanager]# systemctl restart alertmanager

@@ -8,8 +8,8 @@ global:
   opsgenie_api_url: https://api.opsgenie.com/
   wechat_api_url: https://qyapi.weixin.qq.com/cgi-bin/
   victorops_api_url: https://alert.victorops.com/integrations/generic/20131114/alert/
-  wechat_api_secret: 'BcBH8ypr5l3qK-I0QbQ8YBuK_LyipxntT0NZGbb_alc'
-  wechat_api_corp_id: 'wwdf2a82f49d1d8695'
+  wechat_api_secret: '...'
+  wechat_api_corp_id: '...'
 
 
 templates:
@@ -24,11 +24,11 @@ route:
 receivers:
 - name: 'wechat'
   wechat_configs:
-  - corp_id: 'wwdf2a82f49d1d8695'
+  - corp_id: '....'
      #to_party: '62'
-    to_user: 'ShiYouXin|18280259609|TanHengZhi'
-    agent_id: '1000074'
-    api_secret: 'BcBH8ypr5l3qK-I0QbQ8YBuK_LyipxntT0NZGbb_alc'
+    to_user: '...'
+    agent_id: '...'
+    api_secret: '...'
     send_resolved: true
     http_config: {}
     message: '{{ template "wechat.default.message" . }}'

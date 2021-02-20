@@ -1,7 +1,7 @@
 ## 带恢复告警的模版 注：alertmanager.yml wechat_configs中加上配置send_resolved: true
 {{ define "wechat.default.message" }}
 {{ range $i, $alert :=.Alerts }}
-===E区监控报警===
+===xx区监控报警===
 告警状态：{{   .Status }}
 告警级别：{{ $alert.Labels.severity }}
 告警类型：{{ $alert.Labels.alertname }}

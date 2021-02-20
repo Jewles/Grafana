@@ -1,0 +1,73 @@
+## Install Grafana on Centos7
+
+
+## Downlaod Grafana
+
+wget https://dl.grafana.com/oss/release/grafana-7.0.5-1.x86_64.rpm   ## you can go to the official download of the new version ｜ There are official installation tutorials https://grafana.com/grafana/download
+
+## Start Grafana
+[root@localhost home]# systemctl start grafana-server
+[root@localhost home]# systemctl enable grafana-server
+
+## WEB Login
+
+http://you server IP:3000
+ID: admin
+PWD:admin               ##rest password
+
+## Set Port
+
+[root@localhost grafana]# setcap 'cap_net_bind_service=+ep' /usr/sbin/grafana-server
+[root@localhost grafana]# vim /etc/grafana/grafana.ini
+
+# The http port  to use
+http_port = you port
+
+## Install influxdb/telegraf
+
+#add yum source
+cat <<EOF | sudo tee /etc/yum.repos.d/influxdb.repo
+[influxdb]
+name = InfluxDB Repository - RHEL \$releasever
+baseurl = https://repos.influxdata.com/rhel/\$releasever/\$basearch/stable
+enabled = 1
+gpgcheck = 1
+gpgkey = https://repos.influxdata.com/influxdb.key
+EOF
+
+[root@localhost grafana]# yum - y install influxdb
+[root@localhost grafana]# yum - y install telegraf
+
+## telegraf connect influxdb
+
+[root@localhost influxdb]# vim /etc/influxdb/influxdb.conf
+[http]
+  
+   bind-address = ":9096"    ##you port
+
+   :wq
+
+[root@localhost ~]# vim /etc/telegraf/telegraf.conf
+[[outputs.influxdb]]
+  ## The full HTTP or UDP URL for your InfluxDB instance.
+  ##
+  ## Multiple URLs can be specified for a single cluster, only ONE of the
+  ## urls will be written to each interval.
+  # urls = ["unix:///var/run/influxdb.sock"]
+  # urls = ["udp://127.0.0.1:8089"]
+   urls = ["http://127.0.0.1:9096"]
+
+[root@localhost telegraf]# systemctl start telegraf
+[root@localhost telegraf]# systemctl enable telegraf
+[root@localhost influxdb]# systemctl enable influxdb
+[root@localhost influxdb]# systemctl start influxdb
+
+## Set Grafana database
+
+name = telegraf
+URL = http://localhost:9096
+database = telegraf
+user = root
+password = root
+
+ 

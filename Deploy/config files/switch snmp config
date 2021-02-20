@@ -1,0 +1,6 @@
+snmp-agent
+snmp-agent community read cipher xxxx
+snmp-agent sys-info version  v2c
+undo snmp-agent sys-info version v3
+snmp-agent target-host trap address udp-domain grafana_ip params securityname cipher xxxx v2c
+snmp-agent trap enable

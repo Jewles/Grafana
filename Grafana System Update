@@ -1,0 +1,56 @@
+#官网下载最新OSS文件
+官方链接：https://grafana.com/grafana/download
+Version 选择要升级的系统版本
+Edition 选择OSS
+
+#进入Linux主机，本章是用的Centos7 虚拟机
+首先保存虚拟机快照，方便出问题时直接回滚系统
+
+#停止所有与Grafana相关的应用
+systemctl stop grafana-server.service
+systemctl stop telegraf.service
+systemctl stop influxdb.service
+systemctl stop alertmanager.service
+
+#升级Grafana
+找到Grafana rpm包
+rpm -Uvh  grafana-8.5.10-1.x86_64.rpm  #等待自动升级
+
+#升级完成后遇到如下报错
+lvl=eror msg=“Failed to read plugin provisioning files from directory” 
+logger=provisioning.plugins path=/etc/grafana/provisioning/plugins 
+error=“open /etc/grafana/provisioning/plugins: no such file or directory”
+
+#创建plugins
+mkdir /etc/grafana/provisioning/plugins
+
+#创建sample.yaml文件
+vim /etc/grafana/provisioning/plugins/sample.yaml
+#将以下内容粘贴进去
+# # config file version
+apiVersion: 1
+
+# apps:
+#   - type: grafana-example-app
+#     org_name: Main Org.
+#     disabled: true
+#   - type: raintank-worldping-app
+#     org_id: 1
+#     jsonData:
+#       apiKey: "API KEY"
+
+#升级完成后遇到如下报错
+lvl=eror msg="Server shutdown" 
+logger=server reason="listen tcp 0.0.0.0:80: bind: address already in use"
+#直接访问grafana.ini修改配置文件
+vim /etc/grafana/grafana.ini
+[server]
+# Protocol (http, https, h2, socket)
+protocol = http
+
+# The ip address to bind to, empty will bind to all interfaces
+http_addr = 172.16.200.15
+
+# The http port  to use
+http_port = 3000           #将报错的端口80改成3000 重启grafana即可
+
